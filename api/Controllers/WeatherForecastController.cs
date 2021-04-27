@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Api.Cqs;
+using Api.Queries;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Controllers
 {
@@ -10,29 +8,20 @@ namespace Api.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+        private readonly ICqsResolver _cqsResolver;
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ICqsResolver cqsResolver)
         {
-            _logger = logger;
+            _cqsResolver = cqsResolver;
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        [ProducesResponseType(typeof(WeatherForecast[]), 200)]
+        public IActionResult Get()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            var query = _cqsResolver.ResolveQuery<IGetWeatherForecastQuery>();
+            WeatherForecast[] forecasts = query.Execute(daysToForecast: 5);
+            return Ok(forecasts);
         }
     }
 }

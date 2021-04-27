@@ -4,9 +4,9 @@ namespace Api.Cqs
 {
     public interface ICqsResolver
     {
-        TCommand ResolveCommand<TCommand>() where TCommand : ICommand<TCommand>;
+        TCommand ResolveCommand<TCommand>() where TCommand : ICommand;
 
-        TQuery ResolveQuery<TQuery>() where TQuery : IQuery<TQuery>;
+        TQuery ResolveQuery<TQuery>() where TQuery : IQuery;
     }
 
     public class CqsResolver : ICqsResolver
@@ -18,12 +18,12 @@ namespace Api.Cqs
             _getServiceByTypeFromContainer = getServiceByTypeFromContainer;
         }
 
-        public TCommand ResolveCommand<TCommand>() where TCommand : ICommand<TCommand>
+        public TCommand ResolveCommand<TCommand>() where TCommand : ICommand
         {
             return ResolveCqsObject<TCommand>();
         }
 
-        public TQuery ResolveQuery<TQuery>() where TQuery : IQuery<TQuery>
+        public TQuery ResolveQuery<TQuery>() where TQuery : IQuery
         {
             return ResolveCqsObject<TQuery>();
         }
@@ -32,10 +32,8 @@ namespace Api.Cqs
         {
             Type cqsType = typeof(T);
 
-            dynamic cqsObject = _getServiceByTypeFromContainer(cqsType)
+            return _getServiceByTypeFromContainer(cqsType)
                 ?? throw new TypeLoadException($"Type not registered in container: {cqsType.Name}.");
-
-            return Convert.ChangeType(cqsObject, cqsType);
         }
     }
 }
